@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 4×A40 工业化求职项目正式验收：启动4 worker并行完成默认600张。
+# 4×A40 多 worker 并行正式验收：启动4 worker并行完成默认600张。
 # 用法: bash scripts/run_industrial_benchmark.sh
 # 断点续跑: BATCH_ID=production_600_... bash scripts/run_industrial_benchmark.sh
 set -euo pipefail

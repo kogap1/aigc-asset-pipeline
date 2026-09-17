@@ -12,12 +12,6 @@ deliverables/
 benchmarks/
 *.log
 
-# 本机临时工作文件
-.tmp_resume/
+# 本机临时文件
 docx_work/
 output.png
-aigc_jd.txt
-
-# 个人求职材料，仅本地保留
-docs/RESUME_PROJECT_SUMMARY.md
-docs/AIGC_INTERVIEW_REVIEW.md
