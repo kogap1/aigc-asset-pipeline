@@ -6,14 +6,16 @@ SD1.5 checkpoint + MTG LoRA -> ComfyUI -> CLIP-Score/FID/性能指标。
 """
 import argparse
 import json
-import math
 import shutil
 import statistics
 import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from agent_pipeline import QualityGate, Scheduler, _wf_params, load_config
+from metrics import compute_fid, make_grid, percentile, write_json, load_records
 
 
 PROMPTS = [
@@ -24,53 +26,6 @@ PROMPTS = [
     "a mystical forest with glowing spirits, fantasy game card art",
     "a necromancer raising undead warriors, dark fantasy card art",
 ]
-
-
-def percentile(values, q):
-    if not values:
-        return None
-    ordered = sorted(values)
-    if len(ordered) == 1:
-        return ordered[0]
-    pos = (len(ordered) - 1) * q
-    lo, hi = math.floor(pos), math.ceil(pos)
-    if lo == hi:
-        return ordered[lo]
-    return ordered[lo] + (ordered[hi] - ordered[lo]) * (pos - lo)
-
-
-def write_json(path, data):
-    Path(path).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def make_grid(files, out_path, cols=6):
-    from PIL import Image, ImageOps
-
-    if not files:
-        return
-    thumb_size = (256, 256)
-    rows = math.ceil(len(files) / cols)
-    canvas = Image.new("RGB", (cols * thumb_size[0], rows * thumb_size[1]), "white")
-    for index, path in enumerate(files):
-        with Image.open(path).convert("RGB") as image:
-            thumb = ImageOps.fit(image, thumb_size)
-            canvas.paste(thumb, ((index % cols) * thumb_size[0], (index // cols) * thumb_size[1]))
-    canvas.save(out_path, optimize=True)
-
-
-def compute_fid(generated_dir, real_dir):
-    from pytorch_fid import fid_score
-
-    return float(fid_score.calculate_fid_given_paths(
-        [str(generated_dir), str(real_dir)], batch_size=32, device="cuda", dims=2048
-    ))
-
-
-def load_records(path):
-    if not path.exists():
-        return {}
-    data = json.loads(path.read_text(encoding="utf-8"))
-    return {record["item_id"]: record for record in data}
 
 
 def main():
