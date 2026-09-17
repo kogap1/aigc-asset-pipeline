@@ -14,9 +14,9 @@
 # 幂等：重复执行安全，已存在/已下载的步骤自动跳过。
 #
 # 用法：
-#   bash scripts/setup_conda.sh            # 装环境+模型+启动
-#   bash scripts/setup_conda.sh --smoke    # 再跑节点校验 + 4 工作流冒烟出图
-#   bash scripts/setup_conda.sh --no-models   # 跳过模型下载（只装软件）
+#   bash scripts/setup/setup_conda.sh            # 装环境+模型+启动
+#   bash scripts/setup/setup_conda.sh --smoke    # 再跑节点校验 + 4 工作流冒烟出图
+#   bash scripts/setup/setup_conda.sh --no-models   # 跳过模型下载（只装软件）
 #
 # 前置：asset_pipeline/ 已上传到 ~/yl/aigc/asset_pipeline，
 #       服务器已装 anaconda3（默认 ~/anaconda3）。
@@ -99,8 +99,8 @@ say "[1/6] pipeline 环境：torch + 编排器依赖"
 mk_env pipeline
 echo "  >> 安装 torch 2.5.1+cu121（与 aigc 训练环境同版本，已验证）..."
 torch_pip "$PIPE_BIN" torch==2.5.1 torchvision==0.20.1
-echo "  >> 安装 requirements-pipeline.txt ..."
-"$PIPE_BIN/pip" install -r "$PIPE/requirements-pipeline.txt" $PIP_MIRROR --timeout 60 --retries 3 \
+echo "  >> 安装 requirements.txt ..."
+"$PIPE_BIN/pip" install -r "$PIPE/requirements.txt" $PIP_MIRROR --timeout 60 --retries 3 \
   || die "pipeline 依赖安装失败"
 "$PIPE_BIN/python" -c "import openai, open_clip, torch, PIL, yaml; print('  pipeline 依赖 OK, torch', torch.__version__)"
 
@@ -127,7 +127,7 @@ echo "  >> 安装 ComfyUI requirements ..."
 
 # 已知坑：新版 ComfyUI requirements 带 comfy_kitchen，与 torch 2.5.1 不兼容（启动即崩）。
 # 本项目工作流（txt2img/img2img/ipadapter/post）用不到 kitchen 节点 → 直接移除。
-echo "  >> 移除 comfy_kitchen（torch 2.5.1 兼容性，见 scripts/fix_comfy_torch.sh）..."
+echo "  >> 移除 comfy_kitchen（torch 2.5.1 兼容性）..."
 "$COMFY_BIN/pip" uninstall -y comfy_kitchen >/dev/null 2>&1 || true
 rm -rf "$CONDA_BASE/envs/comfy/lib/python$PY_VER/site-packages/comfy_kitchen"* 2>/dev/null
 "$COMFY_BIN/python" -c "import torch; print('  comfy torch OK', torch.__version__, torch.version.cuda)"
@@ -153,7 +153,7 @@ for req in "ComfyUI-Impact-Pack/requirements.txt" "ComfyUI_IPAdapter_plus/requir
     "$COMFY_BIN/pip" install -r "$COMFY/custom_nodes/$req" $PIP_MIRROR --timeout 60 --retries 3 \
       || echo "[WARN] $req 安装失败(可手工补)"
 done
-# Impact-Pack / RemBG 补齐依赖（fix_impact_pack.sh 实测清单；sam2 服务器拉不到且本项目用不上 → 跳过）
+# Impact-Pack / RemBG 补齐依赖（sam2 服务器拉不到且本项目用不上 → 跳过）
 "$COMFY_BIN/pip" install segment-anything transformers dill matplotlib scikit-image piexif \
   scipy opencv-python-headless numpy onnxruntime rembg $PIP_MIRROR --timeout 60 --retries 3 \
   || echo "[WARN] Impact-Pack/RemBG 依赖补装失败(可手工补)"
@@ -190,10 +190,10 @@ say "[4/6] 转换 MTG LoRA（diffusers -> bfla）"
 SRC_LORA="$AIGC/gen_project/outputs/lora"
 if [ -d "$SRC_LORA" ]; then
   cd "$PIPE" || die "cd $PIPE 失败"
-  "$COMFY_BIN/python" convert_lora.py --src "$SRC_LORA" --dst "$COMFY/models/loras/mtg_lora.safetensors" \
+  "$COMFY_BIN/python" tools/convert_lora.py --src "$SRC_LORA" --dst "$COMFY/models/loras/mtg_lora.safetensors" \
     || echo "[WARN] LoRA 转换失败"
 else
-  echo "  [SKIP] 未找到 $SRC_LORA，跳过（后续可手工跑 convert_lora.py）"
+  echo "  [SKIP] 未找到 $SRC_LORA，跳过（后续可手工跑 tools/convert_lora.py）"
 fi
 
 # ---------------- 5. 启动 ComfyUI ----------------
@@ -211,10 +211,10 @@ done
 # ---------------- 6. 校验 + 冒烟 ----------------
 say "[6/6] 校验工作流节点"
 cd "$PIPE" || die "cd $PIPE 失败"
-if "$PIPE_BIN/python" validate_wf.py --base_url "$BASE_URL"; then
+if "$PIPE_BIN/python" tools/validate_wf.py --base_url "$BASE_URL"; then
   if [ "$SMOKE" = "1" ]; then
     echo -e "\n==> 冒烟出图（4 工作流各 1 张）..."
-    "$PIPE_BIN/python" scripts/smoke.py
+    "$PIPE_BIN/python" tools/smoke.py
     ls -la deliverables/smoke/ 2>/dev/null
   else
     echo -e "\n（加 --smoke 可冒烟出图验证）"
@@ -231,7 +231,7 @@ echo "    # 编排器（agent_pipeline.py / 冒烟 / e2e）"
 echo "    source $CONDA_BASE/etc/profile.d/conda.sh"
 echo "    conda activate pipeline"
 echo "    cd ~/yl/aigc/asset_pipeline"
-echo "    bash scripts/run_e2e.sh"
+echo "    bash scripts/run/run_e2e.sh"
 echo ""
 echo "    # ComfyUI 已在跑（端口 8188），日志 tail -f $LOG"
 echo "    # 重启: pkill -f 'comfyui/main.py'; $COMFY_BIN/python $COMFY/main.py --listen 0.0.0.0 --port 8188 &"

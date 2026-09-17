@@ -2,7 +2,7 @@
 
 流程: 先用 txt2img 生成一张种子图 → 放入 ComfyUI input → 依次跑
       img2img / ipadapter / wf_post，各自确认出图。
-用法: python scripts/smoke.py
+用法: python tools/smoke.py
 """
 import shutil
 import sys

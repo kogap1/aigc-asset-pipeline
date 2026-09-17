@@ -1,6 +1,6 @@
 """校验 ComfyUI 工作流模板引用的节点类名是否已安装。
 
-用法: python validate_wf.py [--base_url http://127.0.0.1:8188] [--workflows comfyui/workflows]
+用法: python tools/validate_wf.py [--base_url http://127.0.0.1:8188] [--workflows comfyui/workflows]
 有缺失节点时退出码为 1，方便脚本判断。
 """
 import argparse

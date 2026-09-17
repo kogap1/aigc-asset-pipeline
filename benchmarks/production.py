@@ -12,8 +12,10 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from agent_pipeline import DeepSeekAgent, Deliverer, load_config, run_tasks
-from benchmark_96 import compute_fid, make_grid, percentile, write_json
+from metrics import compute_fid, make_grid, percentile, write_json
 
 
 SCENARIOS = [

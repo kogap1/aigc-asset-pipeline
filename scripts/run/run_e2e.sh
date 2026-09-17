@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 端到端小批量：一句话需求 → 全链路 → 检查 deliverables + manifest
 # 前置: ComfyUI 已启动，config.yaml 的 input_dir 已填，.env 里 DEEPSEEK_API_KEY 已填
-# 用法: bash scripts/run_e2e.sh
+# 用法: bash scripts/run/run_e2e.sh
 set -euo pipefail
 
 PIPE=~/yl/aigc/asset_pipeline

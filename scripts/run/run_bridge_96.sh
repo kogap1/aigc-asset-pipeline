@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 项目阶段一→阶段二桥接实验：同 6 个 prompt × 16 张，共 96 张。
-# 可断点续跑。用法: bash scripts/run_benchmark_96.sh
+# 可断点续跑。用法: bash scripts/run/run_bridge_96.sh
 set -euo pipefail
 
 PIPE="${PIPE:-$HOME/yl/aigc/asset_pipeline}"
@@ -15,10 +15,10 @@ curl -sf "$BASE_URL/system_stats" >/dev/null \
   || { echo "[ERROR] ComfyUI 未运行: $BASE_URL"; exit 1; }
 
 echo "==== [2/3] 校验工作流 ===="
-python validate_wf.py --base_url "$BASE_URL"
+python tools/validate_wf.py --base_url "$BASE_URL"
 
 echo "==== [3/3] 运行统一基准 ===="
-python benchmark_96.py \
+python benchmarks/bridge_96.py \
   --out-dir "$OUT_DIR" \
   --real-dir "$REAL_DIR" \
   --num-per-prompt "$NUM_PER_PROMPT"

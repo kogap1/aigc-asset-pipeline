@@ -8,7 +8,7 @@ key 前缀（ComfyUI 标准 SD1.5 checkpoint 格式）：
   first_stage_model.*      -> VAE
 
 用法（服务器 aigc 环境，能访问 huggingface 缓存）:
-  python scripts/convert_diffusers_to_sd.py \
+  python tools/convert_diffusers_to_sd.py \
     --model botp/stable-diffusion-v1-5 \
     --dst ~/yl/aigc/comfyui/models/checkpoints/v1-5-pruned-emaonly.safetensors
 """

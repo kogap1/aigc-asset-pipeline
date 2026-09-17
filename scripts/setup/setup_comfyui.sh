@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 已有 aigc conda 环境时：ComfyUI 一键安装 + 模型下载 + LoRA 转换
 # 前置: asset_pipeline/ 已上传到 ~/yl/aigc/asset_pipeline，并已 conda activate aigc
-# 用法: bash scripts/setup_comfyui.sh
+# 用法: bash scripts/setup/setup_comfyui.sh
 set -uo pipefail
 
 AIGC=~/yl/aigc
@@ -17,7 +17,7 @@ echo "==== [0/6] 检查当前 aigc 环境 ===="
   || { echo "[ERROR] 当前 Python 低于 3.10；请先进入 aigc 环境"; exit 1; }
 "$PYTHON_BIN" -c 'import torch; print("torch", torch.__version__, "cuda", torch.cuda.is_available())' \
   || { echo "[ERROR] 当前环境缺少 torch；请先 conda activate aigc"; exit 1; }
-"$PYTHON_BIN" -m pip install -r "$PIPE/requirements-pipeline.txt" \
+"$PYTHON_BIN" -m pip install -r "$PIPE/requirements.txt" \
   -i https://pypi.tuna.tsinghua.edu.cn/simple \
   || { echo "[ERROR] 编排器依赖安装失败"; exit 1; }
 
@@ -92,7 +92,7 @@ fi
 
 echo "==== [5/6] 转换 LoRA（diffusers -> bfla） ===="
 cd "$PIPE" || exit 1
-"$VENV/bin/python" convert_lora.py \
+"$VENV/bin/python" tools/convert_lora.py \
   --src "$AIGC/gen_project/outputs/lora" \
   --dst "$COMFY/models/loras/mtg_lora.safetensors"
 

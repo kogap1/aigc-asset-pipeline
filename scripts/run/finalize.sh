@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # finalize.sh — 收尾一键：检查 checkpoint + 填配置 + 起 ComfyUI + 冒烟测试
 # 前置: checkpoint 已就位（convert_diffusers_to_sd.py 合并完成）
-# 用法: bash scripts/finalize.sh
+# 用法: bash scripts/run/finalize.sh
 set -uo pipefail
 
 AIGC=~/yl/aigc
@@ -17,7 +17,7 @@ if [ -s "$CHECKPOINT" ]; then
   ls -lh "$CHECKPOINT"
 else
   echo "[ERROR] checkpoint 不存在或为空: $CHECKPOINT"
-  echo "  先跑: python $PIPE/scripts/convert_diffusers_to_sd.py --dst $CHECKPOINT"
+  echo "  先跑: python $PIPE/tools/convert_diffusers_to_sd.py --dst $CHECKPOINT"
   exit 1
 fi
 
@@ -66,4 +66,4 @@ fi
 
 echo "==== [4/4] 冒烟测试 ===="
 cd "$PIPE" || exit 1
-bash scripts/test_wf.sh
+bash scripts/verify/test_wf.sh

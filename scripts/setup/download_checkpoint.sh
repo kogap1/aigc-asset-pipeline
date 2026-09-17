@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 下载 SD1.5 官方 checkpoint（stable-diffusion-v1-5 仓库，gated）
 # 直链可下就用直链；401 则用 HF token；都没 token 则提示用合并脚本兜底。
-# 用法: bash scripts/download_checkpoint.sh
+# 用法: bash scripts/setup/download_checkpoint.sh
 set -uo pipefail
 COMFY=~/yl/aigc/comfyui
 DST="$COMFY/models/checkpoints/v1-5-pruned-emaonly.safetensors"
@@ -26,10 +26,10 @@ else
   echo ">> 仓库 gated 且没有 token，二选一："
   echo "   A) 拿 token 下载（浏览器登录 https://huggingface.co → 打开"
   echo "      https://huggingface.co/settings/tokens 复制 token，然后："
-  echo "      export HF_TOKEN=hf_xxx; bash scripts/download_checkpoint.sh"
+  echo "      export HF_TOKEN=hf_xxx; bash scripts/setup/download_checkpoint.sh"
   echo "      注意：登录后还要先访问仓库页面点同意许可才行）"
   echo "   B) 用合并脚本从本地缓存转（推荐，零下载，30 秒）:"
-  echo "      python scripts/convert_diffusers_to_sd.py --dst $DST"
+  echo "      python tools/convert_diffusers_to_sd.py --dst $DST"
   exit 1
 fi
 

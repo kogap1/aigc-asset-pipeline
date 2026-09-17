@@ -42,13 +42,10 @@ manifest.json + state.json ──→ 可追溯、可恢复交付
 
 ## 3. 关键工程设计
 
-**Agent 场景级规划，而非逐图调用。** DeepSeek 对每个场景调用一次，把业务语言转成视觉语言；再由本地代码把总量扩展到目标张数，靠不同 seed 产生变化。既保留需求理解能力，又避免几百次重复 API 调用带来的费用、延迟和不可复现性。返回值经过字段校验、默认值补齐和失败重试后才进入 ComfyUI，防止自由文本格式变化直接打断执行链路。
-
-**工作流与模型解耦。** 编排器只负责结构化任务、参数填充、调度和状态管理；ComfyUI 负责实际推理；生成与后处理拓扑放在四个 JSON 工作流里。换 checkpoint、LoRA、IP-Adapter 或后处理模型时，不用改 Python 代码。启动正式任务前，先用 `validate_wf.py` 对照 ComfyUI `/object_info` 校验节点是否注册——节点名存在不等于模型一定可加载，所以验收必须落到端到端出图。
-
-**质量闭环但不自欺。** 低于阈值的图换 seed 重采样，不改变业务需求和模型，是成本最低的失败修复方式；同时限制最大重试次数，避免为极少数困难样本造成无限算力消耗和尾部延迟。需要注意：**用 CLIP 选图后再报告 CLIP，分数上升包含选择效应**，因此该机制只能证明"按既定语义规则减少低分交付"，不能等价为人类审美提升。同理，Real-ESRGAN 补出的细节可能是假纹理，所以超分前后两版都保留并各自评分，不把超分默认包装成全面提升。
-
-**可恢复交付。** 每完成一项就更新 `state.json`，失败项不写入已完成集合；用同一 `batch_id` 重启时只处理未完成或失败项，失败不会污染完成集合。`manifest.json` 记录需求、详细 Prompt、seed、每次尝试的分数、阶段评分、耗时和输出路径，支持单张结果回放与问题定位。
+- **Agent 场景级规划，而非逐图调用。** DeepSeek 对每个场景调用一次，把业务语言转成视觉语言；再由本地代码把总量扩展到目标张数，靠不同 seed 产生变化。既保留需求理解能力，又避免几百次重复 API 调用带来的费用、延迟和不可复现性。返回值经过字段校验、默认值补齐和失败重试后才进入 ComfyUI。
+- **工作流与模型解耦。** 编排器只负责结构化任务、参数填充、调度和状态管理；ComfyUI 负责实际推理；生成与后处理拓扑放在四个 JSON 工作流里。换 checkpoint、LoRA、IP-Adapter 或后处理模型时不用改 Python 代码。启动正式任务前先用 `tools/validate_wf.py` 对照 ComfyUI `/object_info` 校验节点——节点名存在不等于模型一定可加载，验收必须落到端到端出图。
+- **质量闭环但不自欺。** 低于阈值的图换 seed 重采样，不改变业务需求和模型，是成本最低的失败修复方式；同时限制最大重试次数，避免为极少数困难样本造成无限算力消耗和尾部延迟。需要注意：**用 CLIP 选图后再报告 CLIP，分数上升包含选择效应**，因此该机制只能证明「按既定语义规则减少低分交付」，不能等价为人类审美提升。同理 Real-ESRGAN 补出的细节可能是假纹理，所以超分前后两版都保留并各自评分。
+- **可恢复交付。** 每完成一项就更新 `state.json`，失败项不写入已完成集合；用同一 `batch_id` 重启时只处理未完成或失败项。`manifest.json` 记录需求、详细 Prompt、seed、每次尝试的分数、阶段评分、耗时和输出路径，支持单张结果回放与问题定位。
 
 ## 4. 实测结果
 
@@ -92,7 +89,7 @@ LoRA 同时改善了文图对齐和与真实卡图的特征分布距离，证明
 两点必须说清楚：
 
 - **超分让 FID 变差**（172.25 → 183.07）。系统因此保留超分前后的两版图片并分别评分，不把超分包装成全面提升；展示场景可以偏向清晰度，强调分布真实性时可以回退原图。
-- 首次通过率 91.3% → 最终 99.5% 的提升，来自"质量门换 seed + 复评"的组合，**不能单独归因于某个模块**。
+- 首次通过率 91.3% → 最终 99.5% 的提升，来自「质量门换 seed + 复评」的组合，**不能单独归因于某个模块**。
 
 ### 4.3 分场景结果
 
@@ -134,26 +131,31 @@ LoRA 同时改善了文图对齐和与真实卡图的特征分布距离，证明
 
 ## 6. 快速开始
 
-**前置检查** —— 校验 ComfyUI API、checkpoint、工作流节点及端到端出图能力：
-
 ```bash
-bash scripts/test_wf.sh
-```
+# 前置检查：ComfyUI API、checkpoint、工作流节点及端到端出图能力
+bash scripts/verify/test_wf.sh
 
-**小批量端到端验证**：
+# 小批量端到端验证
+bash scripts/run/run_e2e.sh "做 3 张 MTG 风格的中国风武将卡牌图"
 
-```bash
-bash scripts/run_e2e.sh "做 3 张 MTG 风格的中国风武将卡牌图"
-```
-
-**正式生产验收**（600 张，可断点续跑）：
-
-```bash
-nohup bash scripts/run_production_benchmark.sh > production_600.log 2>&1 &
+# 正式生产验收（默认 600 张，可断点续跑）
+nohup bash scripts/run/run_production_benchmark.sh > production_600.log 2>&1 &
 tail -f production_600.log
 ```
 
-结果位于 `deliverables/production_600_*/`，核心文件为 `summary.json`、`manifest.json`、`state.json` 和最终图片。中断后续跑只需带上同一批次 ID。
+结果位于 `deliverables/production_600_*/`，核心文件为 `summary.json`、`manifest.json`、`state.json` 和最终图片。中断后续跑只需带上同一 `BATCH_ID`。
+
+`run_production_benchmark.sh` 是唯一的运行入口，三个可选开关吸收了过去的多份脚本：
+
+| 环境变量 | 默认 | 作用 |
+|---|---:|---|
+| `PER_SCENARIO` | 100 | 每场景张数，`=16` 即阶段一/二的 96 张桥接规模 |
+| `WORKERS` | 1 | ComfyUI worker 数，`>1` 时自动拉起 worker 池并按端口递增分配 |
+| `RUN_SCALING` | 0 | `=1` 时额外跑 1 worker 与 N worker 各 30 张并输出伸缩对比 |
+
+`SKIP_FID=1` 跳过 FID，`BATCH_ID=...` 指定批次号续跑，`MIN_FREE_GB` 调整磁盘下限（默认 20GB）。**注意 `WORKERS` 默认 1、`RUN_SCALING` 默认 0**：600 张在单 worker 上即可跑完（与 §4.2 实测一致），伸缩对比需显式开启。
+
+桥接基准（不经 Agent 与质量门）另走 `bash scripts/run/run_bridge_96.sh`。
 
 ## 7. ComfyUI 部署
 
@@ -163,10 +165,10 @@ tail -f production_600.log
 
 ```bash
 # 确认终端提示符已经在目标 conda 环境里
-bash scripts/setup_comfyui.sh
+bash scripts/setup/setup_comfyui.sh
 ```
 
-脚本做五件事：clone ComfyUI（GitHub 不通走 gh-proxy 镜像）→ 建独立 venv 并 `--system-site-packages` 复用系统 torch（**不污染训练环境**）→ 装自定义节点（IPAdapter-Plus、Impact-Pack、Manager）→ 下载模型（SD1.5 checkpoint、IPAdapter、CLIP-ViT-H、RealESRGAN_x4plus，走 hf-mirror）→ 调用 `convert_lora.py` 把训练侧的 diffusers/peft 格式 LoRA 转成 ComfyUI 认的 bfla 单文件。
+脚本做五件事：clone ComfyUI（GitHub 不通走 gh-proxy 镜像）→ 建独立 venv 并 `--system-site-packages` 复用系统 torch（**不污染训练环境**）→ 装自定义节点（IPAdapter-Plus、Impact-Pack、Manager）→ 下载模型（SD1.5 checkpoint、IPAdapter、CLIP-ViT-H、RealESRGAN_x4plus，走 hf-mirror）→ 调用 `tools/convert_lora.py` 把训练侧的 diffusers/peft 格式 LoRA 转成 ComfyUI 认的 bfla 单文件。
 
 > 下载失败不中断（IPAdapter / CLIP-ViT-H 属加分项可跳过），但 **SD1.5 checkpoint 必须下成功**，否则所有工作流都跑不了。
 
@@ -181,29 +183,44 @@ curl http://127.0.0.1:8188/system_stats   # 探测就绪
 
 **踩过的坑**：
 
-1. **LoRA 必须转格式**——训练产出是 diffusers/peft 格式（目录 + `adapter_model.safetensors`），ComfyUI 只认 bfla 单文件。`convert_lora.py` 会把 key `base_model.model.unet.*` 改成 `lora_unet_*`、`.lora_A/.lora_B.weight` 改成 `.lora_down/.lora_up.weight`，并打印 down/up 数量供校验。
-2. **节点类名必须匹配**——手写工作流容易用错类名，`validate_wf.py` 会调 `/object_info` 逐个校验，缺哪个报哪个。
+1. **LoRA 必须转格式**——训练产出是 diffusers/peft 格式（目录 + `adapter_model.safetensors`），ComfyUI 只认 bfla 单文件。`tools/convert_lora.py` 会把 key `base_model.model.unet.*` 改成 `lora_unet_*`、`.lora_A/.lora_B.weight` 改成 `.lora_down/.lora_up.weight`，并打印 down/up 数量供校验。
+2. **节点类名必须匹配**——手写工作流容易用错类名，`tools/validate_wf.py` 会调 `/object_info` 逐个校验，缺哪个报哪个。
 3. **双环境隔离**——ComfyUI 用独立 venv，不要在训练环境里装 ComfyUI 依赖，否则会冲掉已训好的 gen_project 依赖。
 4. **新版 Impact-Pack 去掉了 RemBG 节点**——所以当前 `wf_post` 只做 Real-ESRGAN 超分，自动去背景尚未接回主链路。
 5. **IP-Adapter 效果差或下不到权重就直接砍**——删掉 `wf_ipadapter` 调用即可，主链路（txt2img + Agent + 质量门 + 后处理）不受影响。
 
 ## 8. 代码结构
 
+按角色分目录：核心库留根目录；`benchmarks/` 是实验程序，`tools/` 是独立工具，`tests/` 是测试；shell 按 `setup` / `run` / `verify` 三类分开。配置文件在根目录不动。
+
 ```text
-agent_pipeline.py                   Agent 调用、任务编排、ComfyUI 调度与质量门/交付
-production_benchmark_96.py          生产批次、重试、统计与断点续跑（实际入口）
-production_benchmark.py             兼容入口，转发到 production_benchmark_96.py
-benchmark_96.py                     阶段一/二桥接基准，不经 Agent 与质量门
-scaling_summary.py                  单 worker 与 4 worker 的伸缩性实验汇总
-agent_test.py                       逻辑层单测（Agent 输出校验、质量判断、断点重试）
+agent_pipeline.py                   Agent 调用、任务编排、ComfyUI 调度与质量门/交付（核心库）
 config.yaml                         Agent、生成、评分和后处理配置
-validate_wf.py                      对照 ComfyUI /object_info 校验工作流节点
-convert_lora.py                     训练侧 LoRA 到 ComfyUI 格式适配
+requirements.txt                    编排器依赖
+
+benchmarks/                         实验程序
+  production.py                     生产批次、重试、统计与断点续跑（正式验收入口）
+  bridge_96.py                      阶段一/二桥接基准，不经 Agent 与质量门
+  scaling_summary.py                单 worker 与多 worker 的伸缩性实验汇总
+  metrics.py                        基准共用工具（percentile/FID/网格图/JSON 读写）
+
+tools/                              独立工具
+  validate_wf.py                    对照 ComfyUI /object_info 校验工作流节点
+  convert_lora.py                   训练侧 LoRA 到 ComfyUI 格式适配
+  convert_diffusers_to_sd.py        diffusers 目录合并成 ComfyUI 单文件 checkpoint
+  smoke.py                          四工作流真实出图冒烟
+
+tests/
+  test_agent.py                     逻辑层单测（Agent 输出校验、质量判断、断点重试）
+
 comfyui/workflows/                  四条 ComfyUI API 工作流
-scripts/setup_comfyui.sh            一键安装 ComfyUI + 节点 + 模型 + LoRA 转换
-scripts/test_wf.sh                  节点校验 + 四工作流真实出图冒烟
-scripts/run_e2e.sh                  小批量端到端运行入口
-scripts/run_production_benchmark.sh 正式生产验收入口
+
+scripts/
+  setup/                            setup_comfyui.sh · setup_conda.sh · download_checkpoint.sh
+  run/                              run_production_benchmark.sh · run_e2e.sh · run_bridge_96.sh
+                                    start_comfy_workers.sh · finalize.sh
+  verify/                           test_wf.sh
+
 samples/                            600 张批次的代表性成品与元数据
 ```
 

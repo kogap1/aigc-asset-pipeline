@@ -30,7 +30,7 @@ generation:
   sampler: "euler"
   scheduler: "normal"
   img2img_denoise: 0.6
-  lora_name: "mtg_lora.safetensors"       # convert_lora.py 转换后放到 ComfyUI/models/loras/
+  lora_name: "mtg_lora.safetensors"       # tools/convert_lora.py 转换后放到 ComfyUI/models/loras/
   lora_strength: 0.8
   negative_prompt: "lowres, bad anatomy, bad hands, text, watermark, signature, worst quality, low quality, blurry, jpeg artifacts"
 

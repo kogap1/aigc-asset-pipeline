@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 工作流冒烟：等 ComfyUI 就绪 → 校验节点 → 各工作流出图一张
 # 前置: ComfyUI 已启动（nohup ... & ），asset_pipeline 在 ~/yl/aigc/asset_pipeline
-# 用法: bash scripts/test_wf.sh
+# 用法: bash scripts/verify/test_wf.sh
 set -uo pipefail
 
 PIPE=~/yl/aigc/asset_pipeline
@@ -19,13 +19,13 @@ for i in $(seq 1 60); do
 done
 
 echo "==> 校验工作流节点类名"
-if ! python validate_wf.py --base_url "$BASE_URL"; then
+if ! python tools/validate_wf.py --base_url "$BASE_URL"; then
   echo "[ERROR] 有节点未安装，请先装齐自定义节点"
   exit 1
 fi
 
 echo "==> 各工作流冒烟出图"
-python scripts/smoke.py
+python tools/smoke.py
 
 echo "==> 冒烟输出:"
 ls -la deliverables/smoke/ 2>/dev/null

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 启动 4×A40 对应的 4 个 ComfyUI worker（端口 8188-8191）。
-# 已就绪的端口不会重复启动。用法: bash scripts/start_comfy_workers.sh
+# 已就绪的端口不会重复启动。用法: bash scripts/run/start_comfy_workers.sh
 set -euo pipefail
 
 AIGC="${AIGC:-$HOME/yl/aigc}"

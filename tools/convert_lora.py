@@ -9,7 +9,7 @@ bfla 格式 key（ComfyUI 期望）:
   lora_te1_text_model.encoder.layers.0.self_attn.q_proj.lora_down.weight
 
 用法:
-  python convert_lora.py --src <diffusers目录或safetensors> --dst <out.safetensors>
+  python tools/convert_lora.py --src <diffusers目录或safetensors> --dst <out.safetensors>
 """
 import argparse
 import json

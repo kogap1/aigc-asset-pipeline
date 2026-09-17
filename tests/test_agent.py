@@ -1,6 +1,6 @@
 """本机可跑的编排器逻辑测试（无需服务器 / DeepSeek key / open_clip）。
 
-运行: python agent_test.py
+运行: python tests/test_agent.py
 """
 import json
 import sys
@@ -10,6 +10,8 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from agent_pipeline import DeepSeekAgent, Deliverer, QualityGate, run_tasks
 
