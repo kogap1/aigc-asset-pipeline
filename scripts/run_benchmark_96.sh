@@ -6,7 +6,7 @@ set -euo pipefail
 PIPE="${PIPE:-$HOME/yl/aigc/asset_pipeline}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8188}"
 REAL_DIR="${REAL_DIR:-$HOME/yl/aigc/gen_project/data/clean/eval}"
-OUT_DIR="${OUT_DIR:-$PIPE/benchmarks/comfy_lora_96}"
+OUT_DIR="${OUT_DIR:-$PIPE/deliverables/comfy_lora_96}"
 NUM_PER_PROMPT="${NUM_PER_PROMPT:-16}"
 
 cd "$PIPE"

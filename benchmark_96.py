@@ -76,7 +76,7 @@ def load_records(path):
 def main():
     parser = argparse.ArgumentParser(description="6 prompts × N 张 ComfyUI LoRA 部署基准")
     parser.add_argument("--config", default=None)
-    parser.add_argument("--out-dir", default="benchmarks/comfy_lora_96")
+    parser.add_argument("--out-dir", default="deliverables/comfy_lora_96")
     parser.add_argument("--real-dir", default="../gen_project/data/clean/eval")
     parser.add_argument("--num-per-prompt", type=int, default=16)
     parser.add_argument("--seed", type=int, default=20260821)

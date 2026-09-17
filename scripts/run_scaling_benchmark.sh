@@ -9,7 +9,7 @@ WORKER_COUNT="${WORKER_COUNT:-4}"
 STAMP="${STAMP:-$(date +%Y%m%d_%H%M%S)}"
 SINGLE_BATCH="scaling_1w_30_$STAMP"
 MULTI_BATCH="scaling_${WORKER_COUNT}w_30_$STAMP"
-OUT_DIR="$PIPE/benchmarks/scaling_$STAMP"
+OUT_DIR="$PIPE/deliverables/scaling_$STAMP"
 
 cd "$PIPE"
 bash scripts/start_comfy_workers.sh
