@@ -1,0 +1,20 @@
+{
+  "prompt": {
+    "1": {
+      "class_type": "LoadImage",
+      "inputs": { "image": "{{IMAGE}}" }
+    },
+    "3": {
+      "class_type": "UpscaleModelLoader",
+      "inputs": { "model_name": "{{UPSCALE_MODEL}}" }
+    },
+    "4": {
+      "class_type": "ImageUpscaleWithModel",
+      "inputs": { "upscale_model": ["3", 0], "image": ["1", 0] }
+    },
+    "5": {
+      "class_type": "SaveImage",
+      "inputs": { "images": ["4", 0], "filename_prefix": "{{PREFIX}}" }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+# asset_pipeline 配置
+# 服务器执行：不提交密钥，DEEPSEEK_API_KEY 放 .env
+
+comfyui:
+  base_url: "http://127.0.0.1:8188"     # ComfyUI API 地址（服务器本地）
+  workflows_dir: "comfyui/workflows"     # 工作流模板目录（相对本项目根目录）
+  max_poll_sec: 180                       # 单张图轮询超时
+  poll_interval: 2                        # 轮询间隔秒
+  input_dir: "~/yl/aigc/comfyui/input"   # ComfyUI/input 目录，img2img/ipadapter/后处理 需要（改为你的服务器路径）
+  checkpoint: "v1-5-pruned-emaonly.safetensors"   # ComfyUI/models/checkpoints/
+  ipadapter: "ip-adapter_sd15.safetensors"        # ComfyUI/models/ipadapter/
+  clip_vision: "CLIP-ViT-H.safetensors"           # ComfyUI/models/clip_vision/
+  ipadapter_weight: 0.8
+
+agent:
+  model: "deepseek-v4-flash"   # 环境里只有 flash/pro，用 flash（快、省）
+  base_url: "https://api.deepseek.com"
+  temperature: 0.2
+  max_retries: 3                          # DeepSeek 调用退避重试次数
+
+quality:
+  threshold: 0.30                         # CLIP-Score 质量门阈值
+  max_retries: 3                          # 质量门不达标换 seed 重试次数
+
+generation:
+  width: 512                              # SD1.5 原生分辨率范围
+  height: 768                             # 竖版卡图比例
+  steps: 28
+  cfg: 7.0
+  sampler: "euler"
+  scheduler: "normal"
+  img2img_denoise: 0.6
+  lora_name: "mtg_lora.safetensors"       # convert_lora.py 转换后放到 ComfyUI/models/loras/
+  lora_strength: 0.8
+  negative_prompt: "lowres, bad anatomy, bad hands, text, watermark, signature, worst quality, low quality, blurry, jpeg artifacts"
+
+postprocess:
+  rembg_model: "u2net"                    # 为后续重新接入去背景节点预留；当前 wf_post 未使用
+  upscale_model: "RealESRGAN_x4plus.pth"  # 放 ComfyUI/models/upscale_models/
+
+deliver:
+  out_root: "deliverables"                # 交付根目录（gitignore）

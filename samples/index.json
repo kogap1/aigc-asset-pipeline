@@ -1,0 +1,122 @@
+[
+ {
+  "file": "txt2img_0_50.jpg",
+  "scenario": 0,
+  "task": "0_50",
+  "attempts": 1,
+  "gate": 0.3817,
+  "final": 0.3784,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_0_94.jpg",
+  "scenario": 0,
+  "task": "0_94",
+  "attempts": 1,
+  "gate": 0.3306,
+  "final": 0.3381,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_11_18.jpg",
+  "scenario": 5,
+  "task": "11_18",
+  "attempts": 1,
+  "gate": 0.3887,
+  "final": 0.3919,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_11_4.jpg",
+  "scenario": 5,
+  "task": "11_4",
+  "attempts": 1,
+  "gate": 0.3656,
+  "final": 0.364,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_1_49.jpg",
+  "scenario": 1,
+  "task": "1_49",
+  "attempts": 2,
+  "gate": 0.3458,
+  "final": 0.3598,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_1_72.jpg",
+  "scenario": 1,
+  "task": "1_72",
+  "attempts": 1,
+  "gate": 0.3282,
+  "final": 0.3295,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_2_16.jpg",
+  "scenario": 2,
+  "task": "2_16",
+  "attempts": 1,
+  "gate": 0.349,
+  "final": 0.3629,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_6_18.jpg",
+  "scenario": 2,
+  "task": "6_18",
+  "attempts": 1,
+  "gate": 0.3379,
+  "final": 0.3505,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_6_3.jpg",
+  "scenario": 2,
+  "task": "6_3",
+  "attempts": 1,
+  "gate": 0.3433,
+  "final": 0.3351,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_7_75.jpg",
+  "scenario": 3,
+  "task": "7_75",
+  "attempts": 1,
+  "gate": 0.3294,
+  "final": 0.3279,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_9_4.jpg",
+  "scenario": 5,
+  "task": "9_4",
+  "attempts": 1,
+  "gate": 0.4049,
+  "final": 0.3965,
+  "w": 683,
+  "h": 1024
+ },
+ {
+  "file": "txt2img_9_9.jpg",
+  "scenario": 5,
+  "task": "9_9",
+  "attempts": 1,
+  "gate": 0.4294,
+  "final": 0.4306,
+  "w": 683,
+  "h": 1024
+ }
+]

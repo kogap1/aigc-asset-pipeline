@@ -1,0 +1,7 @@
+# 服务器编排器环境依赖（与 ComfyUI 各自独立 venv）
+openai>=1.30.0
+PyYAML>=6.0
+python-dotenv>=1.0
+requests>=2.31
+Pillow>=10.0
+open_clip_torch>=2.20.0

@@ -1,0 +1,57 @@
+{
+  "prompt": {
+    "4": {
+      "class_type": "CheckpointLoaderSimple",
+      "inputs": { "ckpt_name": "{{CHECKPOINT}}" }
+    },
+    "5": {
+      "class_type": "LoraLoader",
+      "inputs": {
+        "model": ["4", 0],
+        "clip": ["4", 1],
+        "lora_name": "{{LORA_NAME}}",
+        "strength_model": "{{LORA_STRENGTH}}",
+        "strength_clip": "{{LORA_STRENGTH}}"
+      }
+    },
+    "6": {
+      "class_type": "CLIPTextEncode",
+      "inputs": { "text": "{{POSITIVE}}", "clip": ["5", 1] }
+    },
+    "7": {
+      "class_type": "CLIPTextEncode",
+      "inputs": { "text": "{{NEGATIVE}}", "clip": ["5", 1] }
+    },
+    "8": {
+      "class_type": "LoadImage",
+      "inputs": { "image": "{{IMAGE}}" }
+    },
+    "9": {
+      "class_type": "VAEEncode",
+      "inputs": { "pixels": ["8", 0], "vae": ["4", 2] }
+    },
+    "10": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": ["5", 0],
+        "positive": ["6", 0],
+        "negative": ["7", 0],
+        "latent_image": ["9", 0],
+        "seed": "{{SEED}}",
+        "steps": "{{STEPS}}",
+        "cfg": "{{CFG}}",
+        "sampler_name": "{{SAMPLER}}",
+        "scheduler": "{{SCHEDULER}}",
+        "denoise": "{{DENOISE}}"
+      }
+    },
+    "11": {
+      "class_type": "VAEDecode",
+      "inputs": { "samples": ["10", 0], "vae": ["4", 2] }
+    },
+    "12": {
+      "class_type": "SaveImage",
+      "inputs": { "images": ["11", 0], "filename_prefix": "{{PREFIX}}" }
+    }
+  }
+}
